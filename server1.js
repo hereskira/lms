@@ -16,31 +16,29 @@ client.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch(err => console.error('Connection error', err.stack));
 
-// Correct usage of express.static() to serve static files from 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Serve the index.html file at the root URL
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Set the view engine to EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'public'));
 
-// Handle form submission
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Handle form submission for login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const userResult = await client.query('SELECT user_id FROM public.login WHERE email=$1 AND password=$2', [email, password]);
-    console.log(userResult.rows);
 
     if (userResult.rows.length > 0) {
       const userId = userResult.rows[0].user_id;
-      const gradesResult = await client.query('SELECT math FROM public.grades WHERE user_id=$1', [userId]);
-      const grades = gradesResult.rows;
+      const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [userId]);
+      const grades = gradesResult.rows[0]; // Assuming there's only one row per user_id
 
-      // Pass grades to the client
+      // Render grades.ejs with grades data
       res.render('grades', { email: email, grades: grades });
     } else {
       // User not found, handle login failure
@@ -52,9 +50,10 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Set the view engine to EJS
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'public'));
+// Redirect root URL to /grades
+app.get('/', (req, res) => {
+  res.redirect('/grades');
+});
 
 // Start the server
 app.listen(port, () => {
