@@ -32,12 +32,16 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const result = await client.query('SELECT * FROM public.login WHERE email=$1 AND password=$2', [email, password]);
-    console.log(result.rows);
+    const userResult = await client.query('SELECT user_id FROM public.login WHERE email=$1 AND password=$2', [email, password]);
+    console.log(userResult.rows);
 
-    if (result.rows.length > 0) {
-      // User found, handle login success
-      res.redirect('/grades.html'); // Redirect to grades.html on successful login
+    if (userResult.rows.length > 0) {
+      const userId = userResult.rows[0].user_id;
+      const gradesResult = await client.query('SELECT math FROM public.grades WHERE user_id=$1', [userId]);
+      const grades = gradesResult.rows;
+
+      // Pass grades to the client
+      res.render('grades', { email: email, grades: grades });
     } else {
       // User not found, handle login failure
       res.send('Login failed. Invalid email or password.');
@@ -47,6 +51,10 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
+// Set the view engine to EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'public'));
 
 // Start the server
 app.listen(port, () => {

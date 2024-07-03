@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades</title>
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="grades-container">
+        <h2>Grades for <%= email %></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% grades.forEach(function(grade) { %>
+                    <tr>
+                        <td>Math</td>
+                        <td><%= grade.math %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
