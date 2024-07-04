@@ -8,7 +8,8 @@
 </head>
 <body>
     <div class="grades-container">
-        <h2>Grades for <%= user.fname %> <%= user.mname %> <%= user.lname %></h2>
+        <h2>Welcome back <%= user.fname %> <%= user.mname %> <%= user.lname %>!</h2>
+        <% if (grades) { %>
         <table>
             <thead>
                 <tr>
@@ -35,6 +36,32 @@
                 </tr>
             </tbody>
         </table>
+        <% } else { %>
+        <p>No grades available.</p>
+        <% } %>
+
+        <% if (user.role === 'teacher') { %>
+        <h3>Update Grades</h3>
+        <form action="/update-grades" method="POST">
+            <div>
+                <label for="math">Math</label>
+                <input type="text" id="math" name="math" value="<%= grades.math %>">
+            </div>
+            <div>
+                <label for="science">Science</label>
+                <input type="text" id="science" name="science" value="<%= grades.science %>">
+            </div>
+            <div>
+                <label for="english">English</label>
+                <input type="text" id="english" name="english" value="<%= grades.english %>">
+            </div>
+            <div>
+                <label for="pe">PE</label>
+                <input type="text" id="pe" name="pe" value="<%= grades.pe %>">
+            </div>
+            <button type="submit">Update Grades</button>
+        </form>
+        <% } %>
     </div>
 </body>
 </html>
