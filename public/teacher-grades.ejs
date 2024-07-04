@@ -7,7 +7,9 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Welcome, <%= user.fname %> <%= user.lname %></h1>
+    <div class="parent-container">
+        <div class="tgrades-container">
+            <h1>Welcome, <%= user.fname %> <%= user.lname %></h1>
     <h2>All Student Grades</h2>
 
     <table>
@@ -38,6 +40,8 @@
             <% }); %>
         </tbody>
     </table>
+        </div>
+    </div>
 
     <script>
         document.querySelectorAll('.update-grade-button').forEach(button => {

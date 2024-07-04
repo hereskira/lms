@@ -14,53 +14,55 @@
     </style>
 </head>
 <body>
-    <div class="grades-container">
-        <h2>Welcome back <%= user.fname %> <%= user.lname %>!</h2>
-        <% if (grades) { %>
-        <table>
-            <thead>
-                <tr>
-                    <th>Subject</th>
-                    <th>Grade</th>
-                    <% if (user.role === 'teacher') { %>
-                    <th>Action</th>
-                    <% } %>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Math</td>
-                    <td><%= grades.math %></td>
-                    <% if (user.role === 'teacher') { %>
-                    <td><span class="edit-button" onclick="editGrade('math', '<%= grades.math %>')">Edit</span></td>
-                    <% } %>
-                </tr>
-                <tr>
-                    <td>Science</td>
-                    <td><%= grades.science %></td>
-                    <% if (user.role === 'teacher') { %>
-                    <td><span class="edit-button" onclick="editGrade('science', '<%= grades.science %>')">Edit</span></td>
-                    <% } %>
-                </tr>
-                <tr>
-                    <td>English</td>
-                    <td><%= grades.english %></td>
-                    <% if (user.role === 'teacher') { %>
-                    <td><span class="edit-button" onclick="editGrade('english', '<%= grades.english %>')">Edit</span></td>
-                    <% } %>
-                </tr>
-                <tr>
-                    <td>PE</td>
-                    <td><%= grades.pe %></td>
-                    <% if (user.role === 'teacher') { %>
-                    <td><span class="edit-button" onclick="editGrade('pe', '<%= grades.pe %>')">Edit</span></td>
-                    <% } %>
-                </tr>
-            </tbody>
-        </table>
-        <% } else { %>
-        <p>No grades available.</p>
-        <% } %>
+    <div class="parent-container">
+        <div class="grades-container">
+            <h2>Welcome back <%= user.fname %> <%= user.lname %>!</h2>
+            <% if (grades) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Grade</th>
+                        <% if (user.role === 'teacher') { %>
+                        <th>Action</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Math</td>
+                        <td><%= grades.math %></td>
+                        <% if (user.role === 'teacher') { %>
+                        <td><span class="edit-button" onclick="editGrade('math', '<%= grades.math %>')">Edit</span></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <td>Science</td>
+                        <td><%= grades.science %></td>
+                        <% if (user.role === 'teacher') { %>
+                        <td><span class="edit-button" onclick="editGrade('science', '<%= grades.science %>')">Edit</span></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <td>English</td>
+                        <td><%= grades.english %></td>
+                        <% if (user.role === 'teacher') { %>
+                        <td><span class="edit-button" onclick="editGrade('english', '<%= grades.english %>')">Edit</span></td>
+                        <% } %>
+                    </tr>
+                    <tr>
+                        <td>PE</td>
+                        <td><%= grades.pe %></td>
+                        <% if (user.role === 'teacher') { %>
+                        <td><span class="edit-button" onclick="editGrade('pe', '<%= grades.pe %>')">Edit</span></td>
+                        <% } %>
+                    </tr>
+                </tbody>
+            </table>
+            <% } else { %>
+            <p>No grades available.</p>
+            <% } %>
+        </div>
     </div>
 
     <% if (user.role === 'teacher') { %>
