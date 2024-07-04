@@ -31,15 +31,16 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const userResult = await client.query('SELECT user_id FROM public.login WHERE email=$1 AND password=$2', [email, password]);
+    const userResult = await client.query('SELECT user_id, fname, mname, lname FROM public.login WHERE email=$1 AND password=$2', [email, password]);
 
     if (userResult.rows.length > 0) {
-      const userId = userResult.rows[0].user_id;
+      const user = userResult.rows[0];
+      const userId = user.user_id;
       const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [userId]);
       const grades = gradesResult.rows[0]; // Assuming there's only one row per user_id
 
-      // Render grades.ejs with grades data
-      res.render('grades', { email: email, grades: grades });
+      // Render grades.ejs with user and grades data
+      res.render('grades', { user: user, grades: grades });
     } else {
       // User not found, handle login failure
       res.send('Login failed. Invalid email or password.');
