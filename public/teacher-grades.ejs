@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Grades</title>
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Welcome, <%= user.fname %> <%= user.lname %></h1>
+    <h2>All Student Grades</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Math</th>
+                <th>Science</th>
+                <th>English</th>
+                <th>PE</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% students.forEach(student => { %>
+            <tr>
+                <td><%= student.user_id %></td>
+                <td><%= student.fname %></td>
+                <td><%= student.lname %></td>
+                <td><input type="text" value="<%= student.math %>" class="grade-input" data-user_id="<%= student.user_id %>" data-subject="math"></td>
+                <td><input type="text" value="<%= student.science %>" class="grade-input" data-user_id="<%= student.user_id %>" data-subject="science"></td>
+                <td><input type="text" value="<%= student.english %>" class="grade-input" data-user_id="<%= student.user_id %>" data-subject="english"></td>
+                <td><input type="text" value="<%= student.pe %>" class="grade-input" data-user_id="<%= student.user_id %>" data-subject="pe"></td>
+                <td><button class="update-grade-button" data-user_id="<%= student.user_id %>">Update</button></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <script>
+        document.querySelectorAll('.update-grade-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const user_id = button.getAttribute('data-user_id');
+                const inputs = document.querySelectorAll(`.grade-input[data-user_id="${user_id}"]`);
+                const grades = {};
+        
+                inputs.forEach(input => {
+                    grades[input.getAttribute('data-subject')] = input.value;
+                });
+        
+                const response = await fetch('/update-grades', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id, grades })
+                });
+        
+                if (response.ok) {
+                    alert('Grades updated successfully.');
+                } else {
+                    alert('Failed to update grades.');
+                }
+            });
+        });
+    </script>
+    
+    
+</body>
+</html>

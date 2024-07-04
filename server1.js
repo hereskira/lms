@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const port = 1000;
 const bodyParser = require('body-parser');
-const { Pool, Client } = require('pg');
+const { Client } = require('pg');
 const path = require('path'); // for working with file paths
 const session = require('express-session'); // for session management
 
@@ -19,6 +19,9 @@ client.connect()
 
 // Middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
 
 // Set up session management
 app.use(session({
@@ -53,7 +56,7 @@ app.post('/register', async (req, res) => {
       await client.query('INSERT INTO public.grades (user_id, math, science, english, pe) VALUES ($1, 0, 0, 0, 0)', [user_id]);
 
       // Redirect to index.html after successful registration
-      res.redirect('/index.html');
+      res.redirect('/index.html?success=true');
     }
   } catch (err) {
     console.error('Database query error', err.stack);
@@ -70,16 +73,21 @@ app.post('/login', async (req, res) => {
 
     if (userResult.rows.length > 0) {
       const user = userResult.rows[0];
-      const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [user.user_id]);
-      const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
 
-      // Store user data in the session
-      req.session.user = user;
+      if (user.role === 'teacher') {
+        const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id');
+        const students = studentsResult.rows;
 
-      // Render grades.ejs with user and grades data
-      res.render('grades', { user: user, grades: grades });
+        req.session.user = user;
+        res.render('teacher-grades', { user: user, students: students });
+      } else {
+        const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [user.user_id]);
+        const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
+
+        req.session.user = user;
+        res.render('grades', { user: user, grades: grades });
+      }
     } else {
-      // User not found, handle login failure
       res.send('Login failed. Invalid email or password.');
     }
   } catch (err) {
@@ -99,29 +107,25 @@ function isTeacher(req, res, next) {
 
 // Route to update grades (only accessible by teachers)
 app.post('/update-grades', isTeacher, async (req, res) => {
-  const { subject, grade } = req.body;
+  const { user_id, grades } = req.body;
+
+  console.log('Received grades:', grades);
 
   try {
-    await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, req.session.user.user_id]);
+    // Check if grades object is defined
+    if (!grades || typeof grades !== 'object') {
+      return res.status(400).send('Invalid grades data.');
+    }
 
-    // Fetch updated grades after the update
-    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
-    const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
+    // Update each subject grade for the specified student
+    for (const [subject, grade] of Object.entries(grades)) {
+      await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, user_id]);
+    }
 
-    // Render grades.ejs with updated grades
-    res.render('grades', { user: req.session.user, grades: grades });
+    res.sendStatus(200);
   } catch (err) {
     console.error('Database query error', err.stack);
     res.status(500).send('Internal server error');
-  }
-});
-
-// Redirect root URL to /grades
-app.get('/', (req, res) => {
-  if (req.session.user) {
-    res.redirect('/grades');
-  } else {
-    res.redirect('/login');
   }
 });
 
@@ -132,9 +136,15 @@ app.get('/grades', async (req, res) => {
   }
 
   try {
-    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
-    const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
-    res.render('grades', { user: req.session.user, grades: grades });
+    if (req.session.user.role === 'teacher') {
+      const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id');
+      const students = studentsResult.rows;
+      res.render('teacher-grades', { user: req.session.user, students: students });
+    } else {
+      const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
+      const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
+      res.render('grades', { user: req.session.user, grades: grades });
+    }
   } catch (err) {
     console.error('Database query error', err.stack);
     res.status(500).send('Internal server error');
@@ -143,7 +153,8 @@ app.get('/grades', async (req, res) => {
 
 // Serve index.html and other static files
 app.get('/index.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const successMessage = req.query.success ? 'Account created, please log in.' : '';
+  res.render('index', { successMessage });
 });
 
 // Start the server

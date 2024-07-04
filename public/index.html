@@ -7,6 +7,10 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
+    <% if (successMessage) { %>
+        <p><%= successMessage %></p>
+    <% } %>
+    <h1>Welcome to the Learning Management System</h1>
     <form action="/login" method="POST">
         <div class="parent-container">
             <div class="login-container">
