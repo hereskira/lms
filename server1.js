@@ -76,8 +76,15 @@ app.post('/update-grades', isTeacher, async (req, res) => {
   const { subject, grade } = req.body;
 
   try {
+    // Update the grade in the database
     await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, 1]);
-    res.send('Grades updated successfully.');
+
+    // Fetch updated grades after the update
+    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [1]);
+    const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
+
+    // Render grades.ejs with updated grades
+    res.render('grades', { user: req.session.user, grades: grades });
   } catch (err) {
     console.error('Database query error', err.stack);
     res.status(500).send('Internal server error');
