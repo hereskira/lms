@@ -35,16 +35,42 @@ app.set('views', path.join(__dirname, 'public'));
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Handle form submission for registration
+app.post('/register', async (req, res) => {
+  const { user_id, email, fname, lname, password } = req.body;
+
+  try {
+    // Check if user_id or email already exists
+    const existingUserResult = await client.query('SELECT user_id FROM public.login WHERE user_id=$1 OR email=$2', [user_id, email]);
+
+    if (existingUserResult.rows.length > 0) {
+      // User already exists, show error
+      res.send('Registration failed. User ID or Email already exists.');
+    } else {
+      // Insert new user into the database
+      await client.query('INSERT INTO public.login (user_id, email, fname, lname, password, role) VALUES ($1, $2, $3, $4, $5, $6)', [user_id, email, fname, lname, password, 'student']);
+      // Insert a new row in the grades table for the new user
+      await client.query('INSERT INTO public.grades (user_id, math, science, english, pe) VALUES ($1, 0, 0, 0, 0)', [user_id]);
+
+      // Redirect to index.html after successful registration
+      res.redirect('/index.html');
+    }
+  } catch (err) {
+    console.error('Database query error', err.stack);
+    res.status(500).send('Internal server error');
+  }
+});
+
 // Handle form submission for login
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const userResult = await client.query('SELECT user_id, fname, mname, lname, role FROM public.login WHERE email=$1 AND password=$2', [email, password]);
+    const userResult = await client.query('SELECT user_id, fname, lname, role FROM public.login WHERE email=$1 AND password=$2', [email, password]);
 
     if (userResult.rows.length > 0) {
       const user = userResult.rows[0];
-      const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [1]);
+      const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [user.user_id]);
       const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
 
       // Store user data in the session
@@ -76,11 +102,10 @@ app.post('/update-grades', isTeacher, async (req, res) => {
   const { subject, grade } = req.body;
 
   try {
-    // Update the grade in the database
-    await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, 1]);
+    await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, req.session.user.user_id]);
 
     // Fetch updated grades after the update
-    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [1]);
+    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
     const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
 
     // Render grades.ejs with updated grades
@@ -107,13 +132,18 @@ app.get('/grades', async (req, res) => {
   }
 
   try {
-    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [1]);
+    const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
     const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
     res.render('grades', { user: req.session.user, grades: grades });
   } catch (err) {
     console.error('Database query error', err.stack);
     res.status(500).send('Internal server error');
   }
+});
+
+// Serve index.html and other static files
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server

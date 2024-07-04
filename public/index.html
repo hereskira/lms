@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>LMS</title>
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <form action="/login" method="POST" id="login">
-        <div class="login-container">
-            <h2> Login </h2>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" name="email" id="email" placeholder="Enter email address" required>
+    <form action="/login" method="POST">
+        <div class="parent-container">
+            <div class="login-container">
+                <h2> LMS </h2>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" name="email" id="email" placeholder="Enter email address" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+
+                OR
+
+                <button onclick="window.location.href = 'register.html';" class="login-button">Register</button>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" placeholder="Enter password" required>
         </div>
-        <button type="submit" class="login-button">Login</button>
     </form>
 </body>
 </html>

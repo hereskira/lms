@@ -554,6 +554,10 @@ video {
   --tw-contain-style:  ;
 }
 
+.table {
+  display: table;
+}
+
 body {
   width: 100%;
 }
@@ -596,12 +600,68 @@ body {
   font-family: Raleway, sans-serif;
 }
 
+h2 {
+  margin: 1.25rem;
+}
+
 .login-container {
-  margin-top: 12rem;
+  margin-top: 9rem;
   display: flex;
+  height: 450px;
+  width: 24rem;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border-radius: 1rem;
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.register-container {
+  margin-top: 9rem;
+  display: flex;
+  height: 500px;
+  width: 600px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.parent-container {
+  display: flex;
+  justify-content: center;
+}
+
+.form-group {
+  margin: 0.5rem;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.form-line {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.form-group input {
+  margin: 0.5rem;
+  border-radius: 0.375rem;
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
+  padding: 0.5rem;
+}
+
+.login-button {
+  margin: 0.75rem;
+  width: 5rem;
+  border-radius: 0.375rem;
+  --tw-bg-opacity: 1;
+  background-color: rgb(234 179 8 / var(--tw-bg-opacity));
+  padding: 0.5rem;
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
