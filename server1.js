@@ -73,10 +73,10 @@ function isTeacher(req, res, next) {
 
 // Route to update grades (only accessible by teachers)
 app.post('/update-grades', isTeacher, async (req, res) => {
-  const { math, science, english, pe } = req.body;
+  const { subject, grade } = req.body;
 
   try {
-    await client.query('UPDATE public.grades SET math=$1, science=$2, english=$3, pe=$4 WHERE user_id=$5', [math, science, english, pe, 1]);
+    await client.query(`UPDATE public.grades SET ${subject}=$1 WHERE user_id=$2`, [grade, 1]);
     res.send('Grades updated successfully.');
   } catch (err) {
     console.error('Database query error', err.stack);
