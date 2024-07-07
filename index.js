@@ -168,3 +168,14 @@ app.get('/index.html', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      res.status(500).send('Failed to logout');
+    } else {
+      res.redirect('/index.html');
+    }
+  });
+});
