@@ -3,8 +3,8 @@ const app = express();
 const port = 1000;
 const bodyParser = require('body-parser');
 const { Client } = require('pg');
-const path = require('path'); // for working with file paths
-const session = require('express-session'); // for session management
+const path = require('path');
+const session = require('express-session');
 
 // PostgreSQL connection configuration
 const connectionString = 'postgresql://postgres:admin@localhost:5432/lms';
@@ -17,18 +17,16 @@ client.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch(err => console.error('Connection error', err.stack));
 
-// Middleware to parse URL-encoded bodies
+// Middleware to parse URL-encoded and JSON bodies
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
 // Set up session management
 app.use(session({
-  secret: 'your-secret-key', // Replace with your own secret key
+  secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { secure: false }
 }));
 
 // Set the view engine to EJS
@@ -56,7 +54,7 @@ app.post('/register', async (req, res) => {
       await client.query('INSERT INTO public.grades (user_id, math, science, english, pe) VALUES ($1, 0, 0, 0, 0)', [user_id]);
 
       // Redirect to index.html after successful registration
-      res.redirect('/index.html?success=true');
+      res.redirect('/index.html');
     }
   } catch (err) {
     console.error('Database query error', err.stack);
@@ -75,11 +73,17 @@ app.post('/login', async (req, res) => {
       const user = userResult.rows[0];
 
       if (user.role === 'teacher') {
-        const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id');
+        const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id WHERE l.role = $1', ['student']);
         const students = studentsResult.rows;
 
         req.session.user = user;
         res.render('teacher-grades', { user: user, students: students });
+      } else if (user.role === 'analyst') {
+        const dataResult = await client.query('SELECT l.user_id, l.email, l.fname, l.lname, l.role, g.math, g.science, g.english, g.pe FROM public.login l LEFT JOIN public.grades g ON l.user_id = g.user_id');
+        const data = dataResult.rows;
+
+        req.session.user = user;
+        res.render('analyst-view', { user: user, data: data });
       } else {
         const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [user.user_id]);
         const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
@@ -137,9 +141,13 @@ app.get('/grades', async (req, res) => {
 
   try {
     if (req.session.user.role === 'teacher') {
-      const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id');
+      const studentsResult = await client.query('SELECT l.user_id, l.fname, l.lname, g.math, g.science, g.english, g.pe FROM public.login l JOIN public.grades g ON l.user_id = g.user_id WHERE l.role = $1', ['student']);
       const students = studentsResult.rows;
       res.render('teacher-grades', { user: req.session.user, students: students });
+    } else if (req.session.user.role === 'analyst') {
+      const dataResult = await client.query('SELECT l.user_id, l.email, l.fname, l.lname, l.role, g.math, g.science, g.english, g.pe FROM public.login l LEFT JOIN public.grades g ON l.user_id = g.user_id');
+      const data = dataResult.rows;
+      res.render('analyst-view', { user: req.session.user, data: data });
     } else {
       const gradesResult = await client.query('SELECT math, science, english, pe FROM public.grades WHERE user_id=$1', [req.session.user.user_id]);
       const grades = gradesResult.rows[0] || {}; // Initialize grades as an empty object if no row is found
@@ -153,8 +161,7 @@ app.get('/grades', async (req, res) => {
 
 // Serve index.html and other static files
 app.get('/index.html', (req, res) => {
-  const successMessage = req.query.success ? 'Account created, please log in.' : '';
-  res.render('index', { successMessage });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server

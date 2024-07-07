@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyst View</title>
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Welcome, <%= user.fname %> <%= user.lname %></h1>
+    <h2>All Data</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Role</th>
+                <th>Math</th>
+                <th>Science</th>
+                <th>English</th>
+                <th>PE</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(row => { %>
+            <tr>
+                <td><%= row.user_id %></td>
+                <td><%= row.email %></td>
+                <td><%= row.fname %></td>
+                <td><%= row.lname %></td>
+                <td><%= row.role %></td>
+                <td><%= row.math %></td>
+                <td><%= row.science %></td>
+                <td><%= row.english %></td>
+                <td><%= row.pe %></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>
