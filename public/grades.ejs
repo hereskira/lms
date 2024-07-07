@@ -1,91 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Grades</title>
-    <link href="styles.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet" />
     <style>
-        .edit-button {
-            cursor: pointer;
-            color: blue;
-            text-decoration: underline;
-        }
+      .edit-button {
+        cursor: pointer;
+        color: blue;
+        text-decoration: underline;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="parent-container">
-        <div class="grades-container">
-            <h2>Welcome back <%= user.fname %> <%= user.lname %>!</h2>
-            <% if (grades) { %>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Grade</th>
-                        <% if (user.role === 'teacher') { %>
-                        <th>Action</th>
-                        <% } %>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Math</td>
-                        <td><%= grades.math %></td>
-                        <% if (user.role === 'teacher') { %>
-                        <td><span class="edit-button" onclick="editGrade('math', '<%= grades.math %>')">Edit</span></td>
-                        <% } %>
-                    </tr>
-                    <tr>
-                        <td>Science</td>
-                        <td><%= grades.science %></td>
-                        <% if (user.role === 'teacher') { %>
-                        <td><span class="edit-button" onclick="editGrade('science', '<%= grades.science %>')">Edit</span></td>
-                        <% } %>
-                    </tr>
-                    <tr>
-                        <td>English</td>
-                        <td><%= grades.english %></td>
-                        <% if (user.role === 'teacher') { %>
-                        <td><span class="edit-button" onclick="editGrade('english', '<%= grades.english %>')">Edit</span></td>
-                        <% } %>
-                    </tr>
-                    <tr>
-                        <td>PE</td>
-                        <td><%= grades.pe %></td>
-                        <% if (user.role === 'teacher') { %>
-                        <td><span class="edit-button" onclick="editGrade('pe', '<%= grades.pe %>')">Edit</span></td>
-                        <% } %>
-                    </tr>
-                </tbody>
-            </table>
-            <% } else { %>
-            <p>No grades available.</p>
-            <% } %>
-        </div>
+      <div class="grades-container">
+        <h2>Welcome back <%= user.fname %> <%= user.lname %>!</h2>
+        <% if (grades) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Grade</th>
+              <% if (user.role === 'teacher') { %>
+              <th>Action</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Math</td>
+              <td><%= grades.math %></td>
+              <% if (user.role === 'teacher') { %>
+              <td>
+                <span
+                  class="edit-button"
+                  onclick="editGrade('math', '<%= grades.math %>')"
+                  >Edit</span
+                >
+              </td>
+              <% } %>
+            </tr>
+            <tr>
+              <td>Science</td>
+              <td><%= grades.science %></td>
+              <% if (user.role === 'teacher') { %>
+              <td>
+                <span
+                  class="edit-button"
+                  onclick="editGrade('science', '<%= grades.science %>')"
+                  >Edit</span
+                >
+              </td>
+              <% } %>
+            </tr>
+            <tr>
+              <td>English</td>
+              <td><%= grades.english %></td>
+              <% if (user.role === 'teacher') { %>
+              <td>
+                <span
+                  class="edit-button"
+                  onclick="editGrade('english', '<%= grades.english %>')"
+                  >Edit</span
+                >
+              </td>
+              <% } %>
+            </tr>
+            <tr>
+              <td>PE</td>
+              <td><%= grades.pe %></td>
+              <% if (user.role === 'teacher') { %>
+              <td>
+                <span
+                  class="edit-button"
+                  onclick="editGrade('pe', '<%= grades.pe %>')"
+                  >Edit</span
+                >
+              </td>
+              <% } %>
+            </tr>
+          </tbody>
+        </table>
+        <% } else { %>
+        <p>No grades available.</p>
+        <% } %>
+
+        <form action="/logout" method="GET">
+          <button type="submit" class="logout">Logout</button>
+        </form>
+      </div>
     </div>
 
     <% if (user.role === 'teacher') { %>
-    <div id="edit-modal" style="display:none;">
-        <form id="edit-form" action="/update-grades" method="POST">
-            <input type="hidden" name="subject" id="subject">
-            <label for="grade">New Grade for <span id="subject-name"></span>:</label>
-            <input type="text" name="grade" id="grade">
-            <button type="submit">Update Grade</button>
-        </form>
+    <div id="edit-modal" style="display: none">
+      <form id="edit-form" action="/update-grades" method="POST">
+        <input type="hidden" name="subject" id="subject" />
+        <label for="grade"
+          >New Grade for <span id="subject-name"></span>:</label
+        >
+        <input type="text" name="grade" id="grade" />
+        <button type="submit">Update Grade</button>
+      </form>
     </div>
     <script>
-        function editGrade(subject, currentGrade) {
-            document.getElementById('subject').value = subject;
-            document.getElementById('subject-name').textContent = subject.charAt(0).toUpperCase() + subject.slice(1);
-            document.getElementById('grade').value = currentGrade;
-            document.getElementById('edit-modal').style.display = 'block';
-        }
+      function editGrade(subject, currentGrade) {
+        document.getElementById("subject").value = subject;
+        document.getElementById("subject-name").textContent =
+          subject.charAt(0).toUpperCase() + subject.slice(1);
+        document.getElementById("grade").value = currentGrade;
+        document.getElementById("edit-modal").style.display = "block";
+      }
     </script>
     <% } %>
-
-    <form action="/logout" method="GET">
-        <button type="submit" class="logout">Logout</button>
-    </form>
-</body>
+  </body>
 </html>
